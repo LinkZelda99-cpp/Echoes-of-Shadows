@@ -3,7 +3,15 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include <conio.h>
+#include <string>
+
+#ifdef _WIN32
+    #include <conio.h>
+#else
+    #include <termios.h>
+    #include <unistd.h>
+    #include <sys/select.h>
+#endif
 
 
 // ============================================================
@@ -11,6 +19,8 @@
 // ============================================================
 
 bool enterPressed() {
+
+#ifdef _WIN32
 
     if (_kbhit()) {
 
@@ -20,6 +30,32 @@ bool enterPressed() {
             return true;
         }
     }
+
+#else
+
+    // Check whether input is waiting
+    fd_set set;
+    struct timeval timeout;
+
+    FD_ZERO(&set);
+    FD_SET(STDIN_FILENO, &set);
+
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 0;
+
+    if (select(STDIN_FILENO + 1, &set, nullptr, nullptr, &timeout) > 0) {
+
+        char key;
+
+        if (read(STDIN_FILENO, &key, 1) > 0) {
+
+            if (key == '\n' || key == '\r') {
+                return true;
+            }
+        }
+    }
+
+#endif
 
     return false;
 }
@@ -68,9 +104,9 @@ void waitForEnter() {
 
             // Erase the prompt
             std::cout << "\r"
-                << std::string(prompt.length(), ' ')
-                << "\r"
-                << std::flush;
+                      << std::string(prompt.length(), ' ')
+                      << "\r"
+                      << std::flush;
 
             return;
         }
