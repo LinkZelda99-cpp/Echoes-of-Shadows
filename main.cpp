@@ -3,10 +3,41 @@
 #include <cstdlib>
 #include <ctime>
 #include <limits>
+#include <chrono>
+#include <thread>
 #include "World.h"
 #include "Player.h"
+#include "Dialogue.h"
 
+// Global loop counter
 int loops = 0;
+static void printIntro(int /*loops*/, const std::string &name) {
+    std::cout << "\nWelcome, " << name << "!\n";
+    std::cout << ("----------------------\n");
+    typeText("\033[3mThe shadows overwhelm your senses... darker, darker, yet darker.\033[0m\n", 45);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1200));
+
+    typeText("\033[3mThe darkness grows stronger... until suddenly, it vanishes.\033[0m\n", 55);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1800));
+
+    typeText("You find yourself somewhere you've never been before.\n", 65);
+    std::cout << ("----------------------\n");
+
+    waitForEnter();
+} 
+
+// Print a short contextual line each t
+// +ime the main menu is shown. Replace the
+// placeholders with your lines later.
+static void printLoopDialog(int loops) {
+    if (loops == 0) {
+        //std::cout << "[MENU START LINE FOR FIRST LOOP - WRITE HERE]\n\n";
+    } else if (loops == 1) {
+        
+    } else {
+        std::cout << "[MENU START LINE FOR LOOP " << loops << " - WRITE HERE]\n\n";
+    }
+}
 
 int main() {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -14,26 +45,18 @@ int main() {
     Player player;
 
     std::cout << "Welcome to Echoes of Shadows.\nWhat is your name? ";
-
     std::getline(std::cin, player.name);
-
     if (player.name.empty()) {
-        player.name = "Adventurer";
+        player.name = "Player";
     }
 
-    std::cout << "\nWelcome, " << player.name << "!\n";
-    std::cout << "----------------------\n";
-    std::cout << "\033[3mThe shadows overwhelm your senses... darker, darker, yet darker.\033[0m\n";
-    std::cout << "\033[3mThe darkness grows stronger... until suddenly, it vanishes.\033[0m\n";
-    std::cout << "You find yourself somewhere you've never been before.\n";
-    std::cout << "----------------------\n";
+    printIntro(loops, player.name);
 
-    // Example: programmatically add items to the player's inventory
-    //player.addItem(Item(100, "Health Potion", "Restores 20 HP.", true));
-    //player.addItem(Item(200, "Old Sword", "A rusty sword. Not consumable.", false));
-    //player.showInventory();
-
+    // Main menu loop
     while (true) {
+        // Small contextual/dialogue line depending on how many times we've looped
+        printLoopDialog(loops);
+
         std::cout << "You are surrounded by strange things, as if you have entered another world. Ahead of you is a dark cave. To your right are the ruins of what was once a grand castle. To your left lies a forest that looks as though it has stood there for centuries.\n\n";
         std::cout << "Where would you go in a place like this? Every path feels mysterious. Every direction feels like it hides something.\n";
         std::cout << "1. Explore\n";
@@ -51,6 +74,9 @@ int main() {
 
         switch (choice) {
         case 1:
+            // increment loop counter when the player explores so subsequent
+            // menu displays and intros can vary based on how many times the
+            // player has explored.
             explore(player);
             break;
 

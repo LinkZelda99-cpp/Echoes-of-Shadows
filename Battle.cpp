@@ -1,10 +1,13 @@
 #include "Battle.h"
+#include "Dialogue.h"
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
 #include <limits>
 
 extern int loops;
+BattleOutcome lastBattleOutcome = BattleOutcome::None;
+int lastBattleEnemyId = -1;
 
 int randint(int min, int max) {
     return min + rand() % (max - min + 1);
@@ -50,6 +53,9 @@ void battle(Player& player, int id) {
 
                 if (player.health <= 0) {
                     std::cout << "You have been slain by the Goblin. Game Over.\n";
+                    // record the outcome
+                    lastBattleOutcome = BattleOutcome::PlayerDefeated;
+                    lastBattleEnemyId = id;
                     loops += 1;
                     player.health = 100;
                     player.gold = 0;
@@ -60,7 +66,9 @@ void battle(Player& player, int id) {
                 }
 
                 if (goblin_hp <= 0) {
-                    std::cout << "You defeated the Goblin!\n";
+                    // record the outcome
+                    lastBattleOutcome = BattleOutcome::Victory;
+                    lastBattleEnemyId = id;
                     player.gold += 10;
                     return;
                 }
@@ -68,6 +76,8 @@ void battle(Player& player, int id) {
                   break;
 
             case 2:
+                lastBattleOutcome = BattleOutcome::Ran;
+                lastBattleEnemyId = id;
                 std::cout << "\nYou ran away! But the Goblin got you before you could get away.\n";
                 player.health -= 10;
                 return;
@@ -116,6 +126,8 @@ void battle(Player& player, int id) {
 
                 if (player.health <= 0) {
                     std::cout << "You have been slain by the Skeleton. Game Over.\n";
+                    lastBattleOutcome = BattleOutcome::PlayerDefeated;
+                    lastBattleEnemyId = id;
                     loops += 1;
                     player.health = 100;
                     player.gold = 0;
@@ -125,7 +137,8 @@ void battle(Player& player, int id) {
                     return;
                 }
                 if (skeleton_hp <= 0) {
-                    std::cout << "You defeated the Skeleton!\n";
+                    lastBattleOutcome = BattleOutcome::Victory;
+                    lastBattleEnemyId = id;
                     player.gold += 10;
                     return;
                 }
@@ -133,6 +146,8 @@ void battle(Player& player, int id) {
                   break;
 
             case 2:
+                lastBattleOutcome = BattleOutcome::Ran;
+                lastBattleEnemyId = id;
                 std::cout << "\nYou ran away! But the Skeleton got you before you could get away.\n";
                 player.health -= 10;
                 return;

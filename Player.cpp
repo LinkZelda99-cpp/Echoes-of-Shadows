@@ -1,6 +1,6 @@
 #include "Player.h"
 #include <iostream>
-
+#include "Dialogue.h"
 
 Player::Player() {
     inventory.reserve(INVENTORY_SIZE);
@@ -71,7 +71,8 @@ void Player::showInventory() const {
     std::cout << "---------------\n";
 }
 
-// Implement Item::use here to modify Player as needed.
+// Implement Item::use here to modi
+// Player as needed.
 std::string Item::use(Player& player) const {
     if (id == 100) { // Health Potion
         if (player.health >= 100) return "You are already at full health.";
