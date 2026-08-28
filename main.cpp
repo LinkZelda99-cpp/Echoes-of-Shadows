@@ -57,8 +57,7 @@ int main() {
         // Small contextual/dialogue line depending on how many times we've looped
         printLoopDialog(loops);
 
-        std::cout << "You are surrounded by strange things, as if you have entered another world. Ahead of you is a dark cave. To your right are the ruins of what was once a grand castle. To your left lies a forest that looks as though it has stood there for centuries.\n\n";
-        std::cout << "Where would you go in a place like this? Every path feels mysterious. Every direction feels like it hides something.\n";
+        dialogue("You are surrounded by strange things, as if you have entered another world. Ahead of you is a dark cave. To your right are the ruins of what was once a grand castle. To your left lies a forest that looks as though it has stood there for centuries.\n\nWhere would you go in a place like this? Every path feels mysterious. Every direction feels like it hides something.\n");
         std::cout << "1. Explore\n";
         std::cout << "2. View stats\n";
         std::cout << "3. Inventory\n";

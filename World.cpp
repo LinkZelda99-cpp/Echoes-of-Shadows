@@ -71,9 +71,8 @@ void explore(Player& player) {
         // --------------------------------------------------------
         // THE CHEST
         // --------------------------------------------------------
-
         std::string caveIntro =
-            R"(As you go deeper into the cave, you start to wonder if this was really the right decision. What thing helpful could be in this cave)";
+            R"(As you go deeper into the cave, you start to wonder if this was really the right decision. What useful thing could possibly be in this cave)";
 
         typeText(caveIntro);
 
@@ -83,13 +82,8 @@ void explore(Player& player) {
 
         typeText(
             "? Immediately, you get an answer. Across the room, a large chest is just sitting there nicely. "
+            "\n4\033[3mToo\033[0m nicely.\n"
         );
-
-        std::cout << "\033[3m";
-        typeText("Too");
-        std::cout << "\033[0m";
-
-        typeText(" nicely.\n");
 
         waitForEnter();
 
@@ -150,6 +144,14 @@ For now.)"
             // CAVE DESCENT
             // ====================================================
 
+            
+
+            typeText(
+                R"(Deeper and deeper into the cave, you find that your steps bounce off the wall and then those sounds bounce off each other again and again before reaching your ear, filling the whole cave with endless noise. The darkness jumps at you, only to be only shadows.
+
+Still going deeper and deeper, your thoughts begin to bounce off each other in your own head as well, and your head is full of noise. No thought is formed that's not corrupted by all the others. The shadows seem to grab you and pull you deeper and deeper into the cave, and it gets darker and darker. The walls of the cave are no longer stone, but mirrors. And you see everything in the cave all at once. The shadows ARE grabbing you. Running, you see the end of the cave. But it twists around you. And suddenly, you don't know which way is up and which is down. Everything is bouncing off of everything else.)",
+35
+);
             typeText(
                 "\033[3mThe shadows overwhelm your senses... darker, darker, yet darker.\033[0m\n",
                 45
@@ -170,13 +172,6 @@ For now.)"
             );
 
             typeText("----------------------\n");
-
-            typeText(
-                R"(Deeper and deeper into the cave, you find that your steps bounce off the wall and then those sounds bounce off each other again and again before reaching your ear, filling the whole cave with endless noise. The darkness jumps at you, only to be only shadows.
-
-Still going deeper and deeper, your thoughts begin to bounce off each other in your own head as well, and your head is full of noise. No thought is formed that's not corrupted by all the others. The shadows seem to grab you and pull you deeper and deeper into the cave, and it gets darker and darker. The walls of the cave are no longer stone, but mirrors. And you see everything in the cave all at once. The shadows ARE grabbing you. Running, you see the end of the cave. But it twists around you. And suddenly, you don't know which way is up and which is down. Everything is bouncing off of everything else.)",
-35
-);
 
             waitForEnter();
 
