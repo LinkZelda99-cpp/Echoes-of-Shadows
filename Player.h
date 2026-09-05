@@ -11,7 +11,7 @@ public:
     int health = 100;
     int gold = 0;
 
-    static const int INVENTORY_SIZE = 10;
+    static constexpr int INVENTORY_SIZE = 10;
     std::vector<Item> inventory; // holds items, max INVENTORY_SIZE
 
     // Add an item to inventory. If full, prints a message.
@@ -29,7 +29,7 @@ public:
     // Print current inventory to stdout.
     void showInventory() const;
 
-    void showStats();
+    void showStats() const;
 
     Player();
 

@@ -6,7 +6,8 @@ Player::Player() {
     inventory.reserve(INVENTORY_SIZE);
 }
 
-void Player::showStats() {
+void Player::showStats() const
+{
 
     std::cout << "\n------ STATS ------\n";
     std::cout << "Health: " << health << "\n";

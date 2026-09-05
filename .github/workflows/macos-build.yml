@@ -1,31 +1,28 @@
-name: Build Echoes of Shadows for macOS
+name: Build Echoes of Shadows
 
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
-  build-macos:
-    runs-on: macos-latest
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
 
     steps:
-      - name: Check out source code
+      - name: Check out source
         uses: actions/checkout@v4
 
-      - name: Build Echoes of Shadows
-        run: |
-          clang++ -std=c++17 \
-            main.cpp \
-            World.cpp \
-            Battle.cpp \
-            Player.cpp \
-            Dialogue.cpp \
-            -o EchoesOfShadows
+      - name: Configure
+        run: cmake -S . -B build
 
-      - name: Make executable
-        run: chmod +x EchoesOfShadows
-
-      - name: Upload macOS build
-        uses: actions/upload-artifact@v4
-        with:
-          name: EchoesOfShadows-macOS
-          path: EchoesOfShadows
+      - name: Build
+        run: cmake --build build --config Release
