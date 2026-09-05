@@ -4,6 +4,7 @@
 #include <thread>
 #include <chrono>
 #include <string>
+#include <cctype>
 
 #ifdef _WIN32
 #include <conio.h>
@@ -15,354 +16,258 @@
 #include <sys/select.h>
 #endif
 
-
 // ============================================================
 // TERMINAL WIDTH
 // ============================================================
 
 int getTerminalWidth() {
-
 #ifdef _WIN32
-
     CONSOLE_SCREEN_BUFFER_INFO csbi;
 
-    if (GetConsoleScreenBufferInfo(
-        GetStdHandle(STD_OUTPUT_HANDLE),
-        &csbi)) {
-
+    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
         return csbi.srWindow.Right - csbi.srWindow.Left + 1;
     }
-
 #else
-
     struct winsize w;
 
-    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0) {
-
-        if (w.ws_col > 0) {
-            return w.ws_col;
-        }
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0 && w.ws_col > 0) {
+        return w.ws_col;
     }
-
 #endif
 
-    // Fallback if the terminal size can't be detected.
     return 80;
 }
-
 
 // ============================================================
 // INPUT
 // ============================================================
 
 bool enterPressed() {
-
 #ifdef _WIN32
-
     if (_kbhit()) {
-
         int key = _getch();
-
         if (key == '\r') {
             return true;
         }
     }
-
 #else
-
     fd_set set;
-    struct timeval timeout;
+    struct timeval timeout{};
 
     FD_ZERO(&set);
     FD_SET(STDIN_FILENO, &set);
 
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 0;
-
-    if (select(
-        STDIN_FILENO + 1,
-        &set,
-        nullptr,
-        nullptr,
-        &timeout
-    ) > 0) {
-
+    if (select(STDIN_FILENO + 1, &set, nullptr, nullptr, &timeout) > 0) {
         char key;
 
         if (read(STDIN_FILENO, &key, 1) > 0) {
-
             if (key == '\n' || key == '\r') {
                 return true;
             }
         }
     }
-
 #endif
 
     return false;
 }
-
 
 // ============================================================
 // WORD WRAPPING
 // ============================================================
 
 std::string wrapText(const std::string& text, int width) {
+    if (width < 1) {
+        return text;
+    }
 
     std::string result;
-
     std::string line;
-    std::string word;
-
     int visibleLength = 0;
 
-    bool inEscapeCode = false;
+    auto flushLine = [&]() {
+        result += line;
+        line.clear();
+        visibleLength = 0;
+    };
 
-
-    auto addWord = [&]() {
-
+    auto appendWord = [&](const std::string& word) {
         if (word.empty()) {
             return;
         }
 
+        // Keep ANSI escape sequences out of the visible-width count.
         int wordLength = 0;
+        bool inEscape = false;
 
-        // Count only visible characters.
-        for (size_t i = 0; i < word.length(); ++i) {
-
-            if (word[i] == '\033') {
-                inEscapeCode = true;
+        for (char c : word) {
+            if (c == '\033') {
+                inEscape = true;
                 continue;
             }
 
-            if (inEscapeCode) {
+            if (inEscape) {
+                if (c == 'm') {
+                    inEscape = false;
+                }
+                continue;
+            }
 
-                if (word[i] == 'm') {
-                    inEscapeCode = false;
+            ++wordLength;
+        }
+
+        if (line.empty()) {
+            // A single long word should still be broken instead of relying
+            // on the terminal's automatic wrapping.
+            if (wordLength <= width) {
+                line = word;
+                visibleLength = wordLength;
+                return;
+            }
+
+            int visiblePart = 0;
+            for (size_t i = 0; i < word.size(); ++i) {
+                char c = word[i];
+
+                if (c == '\033') {
+                    line += c;
+                    ++i;
+                    while (i < word.size()) {
+                        line += word[i];
+                        if (word[i] == 'm') {
+                            break;
+                        }
+                        ++i;
+                    }
+                    continue;
                 }
 
-                continue;
+                line += c;
+                ++visiblePart;
+
+                if (visiblePart == width && i + 1 < word.size()) {
+                    result += line;
+                    result += '\n';
+                    line.clear();
+                    visiblePart = 0;
+                }
             }
 
-            wordLength++;
+            visibleLength = visiblePart;
+            return;
         }
 
-
-        // Need a new line?
-        if (!line.empty() &&
-            visibleLength + 1 + wordLength > width) {
-
-            result += line;
-            result += '\n';
-
-            line.clear();
-            visibleLength = 0;
+        if (visibleLength + 1 + wordLength > width) {
+            flushLine();
+            appendWord(word);
+            return;
         }
 
-
-        if (!line.empty()) {
-
-            line += ' ';
-            visibleLength++;
-        }
-
+        line += ' ';
         line += word;
-        visibleLength += wordLength;
+        visibleLength += 1 + wordLength;
+    };
 
-        word.clear();
-        };
+    std::string word;
 
-
-    for (size_t i = 0; i < text.length(); ++i) {
-
-        char c = text[i];
-
-
-        // ----------------------------------------------------
-        // EXPLICIT NEWLINE
-        // ----------------------------------------------------
-
+    for (char c : text) {
         if (c == '\n') {
-
-            addWord();
-
-            // IMPORTANT:
-            // Preserve the newline exactly.
-            result += line;
+            appendWord(word);
+            word.clear();
+            flushLine();
             result += '\n';
-
-            line.clear();
-            visibleLength = 0;
-
-            continue;
+        } else if (std::isspace(static_cast<unsigned char>(c))) {
+            appendWord(word);
+            word.clear();
+        } else {
+            word += c;
         }
-
-
-        // ----------------------------------------------------
-        // SPACE
-        // ----------------------------------------------------
-
-        if (c == ' ') {
-
-            addWord();
-
-            continue;
-        }
-
-
-        // ----------------------------------------------------
-        // CHARACTER
-        // ----------------------------------------------------
-
-        word += c;
     }
 
-
-    // Add anything remaining.
-    addWord();
-
-    result += line;
+    appendWord(word);
+    flushLine();
 
     return result;
 }
-
 
 // ============================================================
 // TYPEWRITER
 // ============================================================
 
 bool typeText(const std::string& text, int speed) {
-
     int terminalWidth = getTerminalWidth();
-
-    // Leave one character of breathing room so we don't
-    // accidentally hit the terminal's automatic wrapping.
     int wrapWidth = terminalWidth - 1;
 
     if (wrapWidth < 20) {
         wrapWidth = 20;
     }
 
-    std::string wrappedText =
-        wrapText(text, wrapWidth);
-
+    const std::string wrappedText = wrapText(text, wrapWidth);
 
     for (size_t i = 0; i < wrappedText.length(); ++i) {
-
         if (enterPressed()) {
-
-            std::cout
-                << wrappedText.substr(i)
-                << std::flush;
-
+            std::cout << wrappedText.substr(i) << std::flush;
             return true;
         }
 
-
-        std::cout
-            << wrappedText[i]
-            << std::flush;
-
-
-        std::this_thread::sleep_for(
-            std::chrono::milliseconds(speed)
-        );
+        std::cout << wrappedText[i] << std::flush;
+        std::this_thread::sleep_for(std::chrono::milliseconds(speed));
     }
 
     return false;
 }
-
 
 // ============================================================
 // WAIT FOR ENTER
 // ============================================================
 
 void waitForEnter() {
+    const std::string prompt = "[Press Enter to continue]";
 
-    const std::string prompt =
-        "[Press Enter to continue]";
-
-    std::cout
-        << "\n\n"
-        << prompt
-        << std::flush;
-
+    std::cout << "\n\n" << prompt << std::flush;
 
     while (true) {
-
         if (enterPressed()) {
-
-            std::cout
-                << "\r"
-                << std::string(
-                    prompt.length(),
-                    ' '
-                )
-                << "\r"
-                << std::flush;
-
+            std::cout << "\r"
+                      << std::string(prompt.length(), ' ')
+                      << "\r"
+                      << std::flush;
             return;
         }
 
-
-        std::this_thread::sleep_for(
-            std::chrono::milliseconds(10)
-        );
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
-
 
 // ============================================================
 // PAUSE
 // ============================================================
 
 void pauseFor(int milliseconds) {
-
-    auto start =
-        std::chrono::steady_clock::now();
-
+    const auto start = std::chrono::steady_clock::now();
 
     while (true) {
-
         if (enterPressed()) {
             return;
         }
 
-
-        auto now =
-            std::chrono::steady_clock::now();
-
-
-        auto elapsed =
-            std::chrono::duration_cast<
-            std::chrono::milliseconds
-            >(now - start).count();
-
+        const auto now = std::chrono::steady_clock::now();
+        const auto elapsed =
+            std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count();
 
         if (elapsed >= milliseconds) {
             return;
         }
 
-
-        std::this_thread::sleep_for(
-            std::chrono::milliseconds(10)
-        );
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
-
 
 // ============================================================
 // DIALOGUE
 // ============================================================
 
-void dialogue(
-    const std::string& text,
-    int speed
-) {
-
-    bool skipped =
-        typeText(text, speed);
-
+void dialogue(const std::string& text, int speed) {
+    const bool skipped = typeText(text, speed);
 
     if (!skipped) {
         waitForEnter();
