@@ -158,7 +158,8 @@ std::string wrapText(const std::string& text, int width) {
 
         if (visibleLength + 1 + wordLength > width) {
             flushLine();
-            appendWord(word);
+            line = word;
+            visibleLength = wordLength;
             return;
         }
 
