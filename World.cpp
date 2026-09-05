@@ -140,11 +140,14 @@ For now.)"
             }
 
 
+            // Continue deeper only after defeating the skeleton.
+            if (lastBattleOutcome != BattleOutcome::Victory) {
+                break;
+            }
+
             // ====================================================
             // CAVE DESCENT
             // ====================================================
-
-            
 
             typeText(
                 R"(Deeper and deeper into the cave, you find that your steps bounce off the wall and then those sounds bounce off each other again and again before reaching your ear, filling the whole cave with endless noise. The darkness jumps at you, only to be only shadows.
