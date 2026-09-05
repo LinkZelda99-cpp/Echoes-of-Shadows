@@ -157,7 +157,10 @@ std::string wrapText(const std::string& text, int width) {
         }
 
         if (visibleLength + 1 + wordLength > width) {
+            // A wrapped line must end with a newline. Without it, the next
+            // word is concatenated directly onto the previous line.
             flushLine();
+            result += '\n';
             line = word;
             visibleLength = wordLength;
             return;
