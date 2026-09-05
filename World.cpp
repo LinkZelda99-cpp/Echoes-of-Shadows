@@ -82,7 +82,7 @@ void explore(Player& player) {
 
         typeText(
             "? Immediately, you get an answer. Across the room, a large chest is just sitting there nicely. "
-            "\n4\033[3mToo\033[0m nicely.\n"
+            "\n\033[3mToo\033[0m nicely.\n"
         );
 
         waitForEnter();
