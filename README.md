@@ -1,33 +1,84 @@
 # Echoes of Shadows
 
-A small, story-driven C++ terminal RPG prototype focused on exploration, dialogue, inventory, and an increasingly strange save system.
+> Something is wrong with this game.
 
-> **Status:** Early development
+Echoes of Shadows is a story-driven terminal RPG written in C++. Explore a ruined world, uncover its history, and figure out what happened to the place you're standing in.
 
-## Overview
+The game remembers.
 
-**Echoes of Shadows** is a command-line RPG prototype written in modern C++. The project is built around a mysterious world that changes as the player explores it, with systems for:
+## About
 
-- Exploration and world navigation
-- Dialogue and typewriter-style text
-- Player stats and inventory
-- Save/load functionality
-- Loop-based narrative changes
-- A deliberately unusual save-data system
+Echoes of Shadows is an experimental RPG focused on exploration, atmosphere, and discovery.
 
-The game is currently a prototype, so mechanics and story elements are expected to change.
+You will explore a world filled with abandoned places, strange encounters, and details that may become more important than they first appear.
 
-## Requirements
+The deeper you go, the more questions you may have.
 
-- A C++20-compatible compiler
+## Features
+
+- Story-driven exploration
+- Turn-based RPG gameplay
+- Persistent save system
+- Exploration and environmental storytelling
+- A world that changes as you progress
+- Hidden and unusual game systems
+- Original C++ implementation
+- CMake-based build system
+
+## The World
+
+Gone.
+
+That's the best way to describe the beauty of the castle in front of you.
+
+All that's left is an empty shell.
+
+The field around it seems equally lifeless.
+
+Walking towards the ruined castle, you notice something near a stream.
+
+A small plastic sword with tape wrapped around the hilt.
+
+And beside it, something else.
+
+## The Game
+
+Echoes of Shadows is designed to let the player discover its story naturally.
+
+The world contains details that may seem insignificant at first. Pay attention to your surroundings, remember what you've seen, and don't be afraid to investigate.
+
+Some parts of the game become stranger as you progress.
+
+## Project Status
+
+**Active Development**
+
+The game is currently under development. Story content, gameplay systems, and other features are still being expanded.
+
+## Building
+
+Echoes of Shadows uses CMake and can be built with a variety of compatible development environments and toolchains.
+
+### Requirements
+
+- C++20-compatible compiler
 - CMake 3.20 or newer
 - Windows, macOS, or Linux
+- Git
 
-## Build with CMake
+### Recommended IDEs
 
-Clone the repository, then configure and build:
+- Visual Studio 2026
+- CLion
+- Visual Studio Code with CMake Tools
+- Other CMake-compatible IDEs
+
+### Clone and Build
 
 ```bash
+git clone https://github.com/LinkZelda99-cpp/Echoes-of-Shadows.git
+cd Echoes-of-Shadows
+
 cmake -S . -B build
 cmake --build build
 ```
@@ -42,13 +93,13 @@ For the intended terminal presentation, run the executable using an **external c
 
 ### Visual Studio
 
-The repository also contains the Visual Studio solution:
+The repository includes the Visual Studio solution:
 
 `Echoes of Shadows.slnx`
 
 Open the solution in Visual Studio 2026 and build the project normally.
 
-## Project structure
+## Project Structure
 
 | File | Purpose |
 | --- | --- |
@@ -64,10 +115,42 @@ Open the solution in Visual Studio 2026 and build the project normally.
 
 ## Development
 
-The project can be developed from either Visual Studio 2026 or CLion. CMake is used as the portable build configuration, while the Visual Studio solution is retained for the native Visual Studio workflow.
+The project uses C++ and CMake as its primary development tools.
+
+CMake keeps the project independent from any single IDE, allowing development in Visual Studio, CLion, VS Code, and other compatible environments.
 
 Build artifacts and IDE-specific files should not be committed.
 
+## Roadmap
+
+- Expand the story
+- Add new areas and locations
+- Expand RPG mechanics
+- Add more encounters
+- Continue developing the game's hidden systems
+- Improve the terminal interface
+- Expand the world and its mysteries
+
+## Contributing
+
+Echoes of Shadows is an open-source project.
+
+Bug reports, ideas, improvements, and pull requests are welcome.
+
+If you find something that appears to be a bug, feel free to open an issue.
+
+If you want to contribute, pull requests are welcome as well.
+
 ## License
 
-Echoes of Shadows is licensed under the MIT License. See [LICENSE.txt](LICENSE.txt).
+Echoes of Shadows is licensed under the MIT License.
+
+See [LICENSE.txt](LICENSE.txt) for the full license text.
+
+## One Last Thing
+
+The README doesn't contain everything.
+
+There's more to the game than what's written here.
+
+Go play it.
