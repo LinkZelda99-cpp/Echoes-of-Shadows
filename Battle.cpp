@@ -14,6 +14,11 @@ int randint(int min, int max) {
 }
 
 void battle(Player& player, int id) {
+    // Every battle starts with a clean outcome so callers never act on
+    // the result of an earlier battle.
+    lastBattleOutcome = BattleOutcome::None;
+    lastBattleEnemyId = id;
+
     switch (id) {
     case 1: {
         std::cout << "\n------ BATTLE ------\n";
