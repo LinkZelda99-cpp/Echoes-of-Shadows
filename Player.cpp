@@ -35,7 +35,7 @@ bool Player::useItem(int index) {
     std::cout << result << "\n";
 
     // A failed use should not consume the item.
-    if (item.consumable && !(item.id == 100 && player.health >= 100)) {
+    if (item.consumable && !(item.id == 100 && health >= 100)) {
         inventory.erase(inventory.begin() + index);
         return true;
     }
