@@ -194,6 +194,21 @@ std::string wrapText(const std::string& text, int width) {
 }
 
 // ============================================================
+// INSTANT TEXT
+// ============================================================
+
+void printText(const std::string& text) {
+    int terminalWidth = getTerminalWidth();
+    int wrapWidth = terminalWidth - 1;
+
+    if (wrapWidth < 20) {
+        wrapWidth = 20;
+    }
+
+    std::cout << wrapText(text, wrapWidth) << std::flush;
+}
+
+// ============================================================
 // TYPEWRITER
 // ============================================================
 
