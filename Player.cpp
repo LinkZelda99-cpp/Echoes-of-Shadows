@@ -33,10 +33,13 @@ bool Player::useItem(int index) {
     Item item = inventory[index];
     std::string result = item.use(*this);
     std::cout << result << "\n";
-    if (item.consumable) {
+
+    // A failed use should not consume the item.
+    if (item.consumable && !(item.id == 100 && player.health >= 100)) {
         inventory.erase(inventory.begin() + index);
         return true;
     }
+
     return false;
 }
 
