@@ -1,0 +1,32 @@
+name: Sanitizers
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  asan-ubsan:
+    name: AddressSanitizer + UndefinedBehaviorSanitizer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build with sanitizers
+        run: |
+          cmake --build build --config Debug \
+            --verbose
+        env:
+          CXXFLAGS: "-fsanitize=address,undefined -fno-omit-frame-pointer"
+          LDFLAGS: "-fsanitize=address,undefined"
+
+      - name: Run save test under sanitizers
+        run: |
+          c++ -std=c++20 -fsanitize=address,undefined -fno-omit-frame-pointer             tests/SaveTests.cpp Save.cpp -o save_tests
+          ./save_tests
