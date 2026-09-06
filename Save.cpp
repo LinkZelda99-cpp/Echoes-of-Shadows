@@ -6,6 +6,7 @@
 #include <random>
 #include <algorithm>
 #include <stdexcept>
+#include <cctype>
 
 // ============================================================
 // INTERNAL HELPERS
@@ -43,6 +44,12 @@ namespace {
 
         if (input.length() % 2 != 0) {
         throw std::invalid_argument("Invalid hexadecimal data length.");
+    }
+
+    for (unsigned char c : input) {
+        if (!std::isxdigit(c)) {
+            throw std::invalid_argument("Invalid hexadecimal character.");
+        }
     }
 
     std::string output;
@@ -278,8 +285,17 @@ bool loadGame(SaveData& data) {
         }
 
         else if (line.rfind("ECHOES=", 0) == 0) {
-            loops = std::stoi(line.substr(7));
-            foundLoops = true;
+            try {
+                size_t parsed = 0;
+                loops = std::stoi(line.substr(7), &parsed);
+                if (parsed != line.size() - 7 || loops < 0) {
+                    return false;
+                }
+                foundLoops = true;
+            }
+            catch (...) {
+                return false;
+            }
         }
 
 
@@ -303,7 +319,11 @@ bool loadGame(SaveData& data) {
 
                 else if (decoded.rfind("ECHOES=", 0) == 0) {
 
-                    loops = std::stoi(decoded.substr(7));
+                    size_t parsed = 0;
+                    loops = std::stoi(decoded.substr(7), &parsed);
+                    if (parsed != decoded.size() - 7 || loops < 0) {
+                        throw std::invalid_argument("Invalid loop count.");
+                    }
                     foundLoops = true;
                 }
 
@@ -326,9 +346,13 @@ bool loadGame(SaveData& data) {
                                 separator - 7
                             );
 
+                        size_t parsed = 0;
                         loops = std::stoi(
-                            decoded.substr(separator + 8)
+                            decoded.substr(separator + 8), &parsed
                         );
+                        if (parsed != decoded.size() - (separator + 8) || loops < 0) {
+                            throw std::invalid_argument("Invalid loop count.");
+                        }
                         foundPlayerName = true;
                         foundLoops = true;
                     }
