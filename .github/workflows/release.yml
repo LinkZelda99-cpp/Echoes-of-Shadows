@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: Windows
+          - os: ubuntu-latest
+            platform: Linux
+          - os: macos-latest
+            platform: macOS
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Package Windows
+        if: runner.os == "Windows"
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path package
+          Copy-Item "build/Release/Echoes_of_Shadows.exe" "package/Echoes_of_Shadows.exe"
+          Compress-Archive -Path "package/Echoes_of_Shadows.exe" -DestinationPath "Echoes-of-Shadows-${{ github.event.release.tag_name || inputs.tag }}-Windows.zip"
+
+      - name: Package Unix
+        if: runner.os != "Windows"
+        shell: bash
+        run: |
+          mkdir -p package
+          cp build/Echoes_of_Shadows package/Echoes_of_Shadows
+          tar -czf "Echoes-of-Shadows-${{ github.event.release.tag_name || inputs.tag }}-${{ matrix.platform }}.tar.gz" -C package Echoes_of_Shadows
+
+      - name: Upload archive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Echoes-of-Shadows-${{ matrix.platform }}
+          path: |
+            Echoes-of-Shadows-*.zip
+            Echoes-of-Shadows-*.tar.gz
+          if-no-files-found: error
+
+      - name: Upload archive to release
+        if: github.event_name == "release"
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Echoes-of-Shadows-*.zip
+            Echoes-of-Shadows-*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
