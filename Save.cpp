@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <random>
 #include <algorithm>
+#include <stdexcept>
 
 // ============================================================
 // INTERNAL HELPERS
@@ -40,7 +41,11 @@ namespace {
 
     std::string fromHex(const std::string& input) {
 
-        std::string output;
+        if (input.length() % 2 != 0) {
+        throw std::invalid_argument("Invalid hexadecimal data length.");
+    }
+
+    std::string output;
 
         for (size_t i = 0; i < input.length(); i += 2) {
 
@@ -216,7 +221,7 @@ bool saveGame(const SaveData& data) {
     }
 
 
-    return true;
+    return file.good();
 }
 
 
@@ -236,6 +241,8 @@ bool loadGame(SaveData& data) {
 
     std::string playerName;
     int loops = 0;
+    bool foundPlayerName = false;
+    bool foundLoops = false;
 
 
     while (std::getline(file, line)) {
@@ -252,10 +259,12 @@ bool loadGame(SaveData& data) {
 
         if (line.rfind("PLAYER_NAME=", 0) == 0) {
             playerName = line.substr(12);
+            foundPlayerName = true;
         }
 
         else if (line.rfind("LOOPS=", 0) == 0) {
             loops = std::stoi(line.substr(6));
+            foundLoops = true;
         }
 
 
@@ -265,10 +274,12 @@ bool loadGame(SaveData& data) {
 
         else if (line.rfind("PLAYER=", 0) == 0) {
             playerName = line.substr(7);
+            foundPlayerName = true;
         }
 
         else if (line.rfind("ECHOES=", 0) == 0) {
             loops = std::stoi(line.substr(7));
+            foundLoops = true;
         }
 
 
@@ -287,11 +298,13 @@ bool loadGame(SaveData& data) {
                 if (decoded.rfind("PLAYER=", 0) == 0) {
 
                     playerName = decoded.substr(7);
+                    foundPlayerName = true;
                 }
 
                 else if (decoded.rfind("ECHOES=", 0) == 0) {
 
                     loops = std::stoi(decoded.substr(7));
+                    foundLoops = true;
                 }
 
 
@@ -303,7 +316,7 @@ bool loadGame(SaveData& data) {
                     decoded = xorTransform(decoded, 0x5A);
 
                     size_t separator =
-                        decoded.find("|ECHOES=");
+                        decoded.rfind("|ECHOES=");
 
                     if (separator != std::string::npos) {
 
@@ -316,6 +329,8 @@ bool loadGame(SaveData& data) {
                         loops = std::stoi(
                             decoded.substr(separator + 8)
                         );
+                        foundPlayerName = true;
+                        foundLoops = true;
                     }
                 }
 
@@ -330,7 +345,7 @@ bool loadGame(SaveData& data) {
     }
 
 
-    if (playerName.empty()) {
+    if (!foundPlayerName || !foundLoops || playerName.empty() || loops < 0) {
         return false;
     }
 
