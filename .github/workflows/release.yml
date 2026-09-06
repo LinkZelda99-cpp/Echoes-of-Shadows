@@ -45,30 +45,41 @@ jobs:
           New-Item -ItemType Directory -Force -Path package
           Copy-Item "build/Release/Echoes_of_Shadows.exe" "package/Echoes_of_Shadows.exe"
           Compress-Archive -Path "package/Echoes_of_Shadows.exe" -DestinationPath "Echoes-of-Shadows-${{ github.event.release.tag_name || inputs.tag }}-Windows.zip"
+          Move-Item "package/Echoes_of_Shadows.exe" "Echoes-of-Shadows-${{ github.event.release.tag_name || inputs.tag }}-Windows.exe"
 
       - name: Package Unix
         if: runner.os != "Windows"
         shell: bash
         run: |
           mkdir -p package
-          cp build/Echoes_of_Shadows package/Echoes_of_Shadows
+          cp build/Echoes_of_Shadows "package/Echoes_of_Shadows"
+          cp build/Echoes_of_Shadows "Echoes-of-Shadows-${{ github.event.release.tag_name || inputs.tag }}-${{ matrix.platform }}"
           tar -czf "Echoes-of-Shadows-${{ github.event.release.tag_name || inputs.tag }}-${{ matrix.platform }}.tar.gz" -C package Echoes_of_Shadows
 
-      - name: Upload archive artifact
+      - name: Upload packaged files
         uses: actions/upload-artifact@v4
         with:
           name: Echoes-of-Shadows-${{ matrix.platform }}
           path: |
-            Echoes-of-Shadows-*.zip
-            Echoes-of-Shadows-*.tar.gz
+            Echoes-of-Shadows-*
           if-no-files-found: error
 
-      - name: Upload archive to release
-        if: github.event_name == "release"
+  publish:
+    name: Publish release assets
+    if: github.event_name == "release"
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all packaged files
+        uses: actions/download-artifact@v4
+        with:
+          pattern: Echoes-of-Shadows-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Upload assets to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            Echoes-of-Shadows-*.zip
-            Echoes-of-Shadows-*.tar.gz
+          files: release-assets/Echoes-of-Shadows-*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
