@@ -1,6 +1,7 @@
 name: Release
 
 on:
+  # Release builds are intentionally not run on normal pushes.
   release:
     types: [published]
   workflow_dispatch:
