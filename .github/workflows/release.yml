@@ -1,7 +1,6 @@
 name: Release
 
 on:
-  # Release builds are intentionally not run on normal pushes.
   release:
     types: [published]
   workflow_dispatch:
@@ -16,9 +15,8 @@ permissions:
 
 jobs:
   build:
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
-    name: Build (${{ matrix.platform }})
-    runs-on: ${{ matrix.os }}
+    name: Build (\${{ matrix.platform }})
+    runs-on: \${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -41,47 +39,49 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Package Windows
-        if: runner.os == "Windows"
+        if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          \$tag = if ('\${{ github.event.release.tag_name }}' -ne '') { '\${{ github.event.release.tag_name }}' } else { '\${{ inputs.tag }}' }
           New-Item -ItemType Directory -Force -Path package
-          Copy-Item "build/Release/Echoes_of_Shadows.exe" "package/Echoes_of_Shadows.exe"
-          Compress-Archive -Path "package/Echoes_of_Shadows.exe" -DestinationPath "Echoes-of-Shadows-${{ github.event.release.tag_name || inputs.tag }}-Windows.zip"
-          Move-Item "package/Echoes_of_Shadows.exe" "Echoes-of-Shadows-${{ github.event.release.tag_name || inputs.tag }}-Windows.exe"
+          Copy-Item 'build/Release/Echoes_of_Shadows.exe' 'package/Echoes_of_Shadows.exe'
+          Compress-Archive -Path 'package/Echoes_of_Shadows.exe' -DestinationPath "Echoes-of-Shadows-\${tag}-Windows.zip"
+          Copy-Item 'package/Echoes_of_Shadows.exe' "Echoes-of-Shadows-\${tag}-Windows.exe"
 
       - name: Package Unix
-        if: runner.os != "Windows"
+        if: runner.os != 'Windows'
         shell: bash
         run: |
+          tag='\${{ github.event.release.tag_name }}'
+          if [ -z "$tag" ]; then tag='\${{ inputs.tag }}'; fi
           mkdir -p package
-          cp build/Echoes_of_Shadows "package/Echoes_of_Shadows"
-          cp build/Echoes_of_Shadows "Echoes-of-Shadows-${{ github.event.release.tag_name || inputs.tag }}-${{ matrix.platform }}"
-          tar -czf "Echoes-of-Shadows-${{ github.event.release.tag_name || inputs.tag }}-${{ matrix.platform }}.tar.gz" -C package Echoes_of_Shadows
+          cp build/Echoes_of_Shadows package/Echoes_of_Shadows
+          cp build/Echoes_of_Shadows "Echoes-of-Shadows-$tag-\${{ matrix.platform }}"
+          tar -czf "Echoes-of-Shadows-$tag-\${{ matrix.platform }}.tar.gz" -C package Echoes_of_Shadows
 
-      - name: Upload packaged files
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Echoes-of-Shadows-${{ matrix.platform }}
-          path: |
-            Echoes-of-Shadows-*
+          name: Echoes-of-Shadows-\${{ matrix.platform }}
+          path: Echoes-of-Shadows-*
           if-no-files-found: error
 
   publish:
     name: Publish release assets
-    if: github.event_name == "release"
+    if: github.event_name == 'release'
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download all packaged files
+      - name: Download packaged builds
         uses: actions/download-artifact@v4
         with:
           pattern: Echoes-of-Shadows-*
           path: release-assets
           merge-multiple: true
 
-      - name: Upload assets to GitHub Release
+      - name: Attach builds to release
         uses: softprops/action-gh-release@v2
         with:
           files: release-assets/Echoes-of-Shadows-*
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
