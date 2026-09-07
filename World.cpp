@@ -30,19 +30,17 @@ void explore(Player& player) {
         return;
     }
 
-
     switch (choice) {
 
-        // ========================================================
-        // DARK CAVE
-        // ========================================================
+    // ========================================================
+    // DARK CAVE
+    // ========================================================
 
     case 1: {
 
         dialogue(
             R"(Hesitantly, you enter the dark cave. Your footsteps echo off the walls and bounce back to you. There are also other sounds. Is that? No, it can't be something else. You must be imagining it. But you can't help but wonder if you're really alone.)"
         );
-
 
         // --------------------------------------------------------
         // STUBBORN SWORD
@@ -67,16 +65,16 @@ void explore(Player& player) {
             sword_gotten = true;
         }
 
-
         // --------------------------------------------------------
         // THE CHEST
         // --------------------------------------------------------
+
         std::string caveIntro =
             R"(As you go deeper into the cave, you start to wonder if this was really the right decision. What useful thing could possibly be in this cave)";
 
         typeText(caveIntro);
 
-        if (sword_gotten == true) {
+        if (sword_gotten) {
             typeText(", besides the Stubborn Sword you just picked up");
         }
 
@@ -86,7 +84,6 @@ void explore(Player& player) {
         );
 
         waitForEnter();
-
 
         // --------------------------------------------------------
         // THE CHEST OPENS
@@ -98,8 +95,7 @@ The chest is untouched. No dust. No damage. Almost as if someone placed it there
 You reach toward the lid.
 The ground cracks beneath you.
 Something pulls itself out of the earth.)"
-);
-
+        );
 
         // --------------------------------------------------------
         // BATTLE
@@ -107,20 +103,26 @@ Something pulls itself out of the earth.)"
 
         battle(player, 2);
 
-
         // ========================================================
         // POST-BATTLE NARRATIVE
         // ========================================================
 
         if (lastBattleEnemyId == 2) {
 
+            // ----------------------------------------------------
+            // VICTORY
+            // ----------------------------------------------------
+
             if (lastBattleOutcome == BattleOutcome::Victory) {
 
                 dialogue(
                     R"(The skeleton slowly crumbles onto the ground.)"
                 );
-
             }
+
+            // ----------------------------------------------------
+            // RAN
+            // ----------------------------------------------------
 
             else if (lastBattleOutcome == BattleOutcome::Ran) {
 
@@ -129,34 +131,34 @@ Something pulls itself out of the earth.)"
 The veneerless grotesquerie abnegates back into the besmirched clod, and you take an abysmal breath.
 You're safe.
 For now.)"
-);
-
+                );
             }
+
+            // ----------------------------------------------------
+            // PLAYER DEFEATED
+            // ----------------------------------------------------
 
             else if (lastBattleOutcome == BattleOutcome::PlayerDefeated) {
 
-                // dialogue("[YOU DIED TO SKELETON STORY - WRITE HERE]");
-
-            }
-
-
-            // Continue deeper only after defeating the skeleton.
-            if (lastBattleOutcome != BattleOutcome::Victory) {
-                break;
+                return;
             }
 
             // ====================================================
             // CAVE DESCENT
+            //
+            // Both Victory and Ran continue here.
+            // PlayerDefeated returns above and never reaches this.
             // ====================================================
 
             typeText(
                 R"(Deeper and deeper into the cave, you find that your steps bounce off the wall and then those sounds bounce off each other again and again before reaching your ear, filling the whole cave with endless noise. The darkness jumps at you, only to be only shadows.
 
 Still going deeper and deeper, your thoughts begin to bounce off each other in your own head as well, and your head is full of noise. No thought is formed that's not corrupted by all the others. The shadows seem to grab you and pull you deeper and deeper into the cave, and it gets darker and darker. The walls of the cave are no longer stone, but mirrors. And you see everything in the cave all at once. The shadows ARE grabbing you. Running, you see the end of the cave. But it twists around you. And suddenly, you don't know which way is up and which is down. Everything is bouncing off of everything else.)",
-35
-);
+                35
+            );
+
             typeText(
-                "\033[3mThe shadows overwhelm your senses... darker, darker, yet darker.\033[0m\n",
+                "\n\033[3mThe shadows overwhelm your senses... darker, darker, yet darker.\033[0m\n",
                 45
             );
 
@@ -184,10 +186,9 @@ Still going deeper and deeper, your thoughts begin to bounce off each other in y
         break;
     }
 
-
-          // ============================================================
-          // ANCIENT FOREST
-          // ============================================================
+    // ============================================================
+    // ANCIENT FOREST
+    // ============================================================
 
     case 2:
 
@@ -200,10 +201,9 @@ Still going deeper and deeper, your thoughts begin to bounce off each other in y
 
         break;
 
-
-        // ============================================================
-        // ABANDONED CASTLE
-        // ============================================================
+    // ============================================================
+    // ABANDONED CASTLE
+    // ============================================================
 
     case 3:
 
@@ -215,10 +215,9 @@ Still going deeper and deeper, your thoughts begin to bounce off each other in y
 
         break;
 
-
-        // ============================================================
-        // INVALID LOCATION
-        // ============================================================
+    // ============================================================
+    // INVALID LOCATION
+    // ============================================================
 
     default:
 
