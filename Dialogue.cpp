@@ -367,7 +367,7 @@ void printText(const std::string& text) {
 
     // Leave one character of breathing room so we don't depend
     // on the terminal's automatic edge wrapping.
-    int wrapWidth = terminalWidth - 1;
+    int wrapWidth = terminalWidth - 2;
 
     if (wrapWidth < 20) {
         wrapWidth = 20;
@@ -384,7 +384,7 @@ bool typeText(const std::string& text, int speed) {
 
     int terminalWidth = getTerminalWidth();
 
-    int wrapWidth = terminalWidth - 1;
+    int wrapWidth = terminalWidth - 2;
 
     if (wrapWidth < 20) {
         wrapWidth = 20;
@@ -504,15 +504,10 @@ void pauseFor(int milliseconds) {
 // ============================================================
 
 void dialogue(const std::string& text, int speed) {
+    const bool skipped = typeText(text, speed);
 
-    const bool skipped =
-        typeText(text, speed);
+    std::cout << '\n' << std::flush;
 
-    // If Enter wasn't pressed during the typewriter,
-    // wait for Enter normally.
-    //
-    // If Enter WAS pressed, the typewriter has already been
-    // completed and we don't require a second Enter.
     if (!skipped) {
         waitForEnter();
     }
